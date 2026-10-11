@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Artorias em Foil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Spectral:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: uma vitrine escura de página única — a carta flutua no centro, controles discretos embaixo. Tema escuro único, por escolha. */
+:root{
+  --abyss:#07090f;
+  --stage:#0d1220;
+  --ink:#d9dcea;
+  --muted:#7d84a3;
+  --line:#232a40;
+  --ember:#c9a45c;
+  --display:"IM Fell English SC", "Cormorant SC", Georgia, serif;
+  --body:"Spectral", Georgia, "Times New Roman", serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+  --rx:0deg; --ry:0deg; --mx:50%; --my:50%; --hyp:0; --bgx:50%; --bgy:50%;
+  --intensity:.85; --flip:0deg;
+}
+html,body{height:100%}
+body{
+  margin:0;background:var(--abyss);color:var(--ink);font-family:var(--body);
+  background-image:
+    radial-gradient(ellipse 70% 55% at 50% 42%, #1a2340 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 50% 100%, #121a30 0%, transparent 80%);
+  overflow:hidden;
+}
+.wrap{
+  height:100%;display:flex;flex-direction:column;align-items:center;
+  padding-inline:16px;padding-block:14px 12px;box-sizing:border-box;gap:10px;
+}
+header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;justify-content:center;text-align:center}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(1.15rem,2.6vw,1.6rem);margin:0;letter-spacing:.02em;text-wrap:balance}
+.tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
+
+.stage{
+  flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;
+  perspective:1400px;touch-action:none;cursor:grab;position:relative;
+  --cw:min(80vw, calc((100dvh - 190px) * .708), 440px);
+}
+.stage:active{cursor:grabbing}
+.shadow{
+  position:absolute;width:var(--cw);height:calc(var(--cw)*.12);border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(0,0,0,.75), transparent 70%);
+  top:calc(50% + var(--cw)*.74);left:50%;
+  transform:translateX(calc(-50% + var(--ry)*-1.2px)) scaleX(calc(1 - var(--hyp)*.15));
+  filter:blur(6px);pointer-events:none;
+}
+.card{
+  width:var(--cw);aspect-ratio:1158/1637;max-width:100%;position:relative;
+  transform-style:preserve-3d;
+  transform:rotateX(var(--rx)) rotateY(calc(var(--ry) + var(--flip)));
+  transition:transform .0s;
+  will-change:transform;
+}
+.card.flipping{transition:transform .7s cubic-bezier(.3,.7,.2,1)}
+.face{
+  position:absolute;inset:0;border-radius:4.6% / 3.3%;overflow:hidden;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  box-shadow:0 0 0 1px rgba(255,255,255,.06), 0 30px 60px -20px rgba(0,0,0,.9);
+  isolation:isolate;
+}
+.front img{width:100%;height:100%;object-fit:cover;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
+
+/* camada foil */
+.foil,.glitter,.glare{position:absolute;inset:0;pointer-events:none}
+.foil{
+  background-image:
+    repeating-linear-gradient(110deg,
+      hsl(2,100%,73%) 0%, hsl(53,100%,69%) 7%, hsl(93,100%,69%) 14%,
+      hsl(176,100%,76%) 21%, hsl(228,100%,74%) 28%, hsl(283,100%,73%) 35%, hsl(2,100%,73%) 42%),
+    repeating-linear-gradient(-45deg,
+      #0e152e 0%, hsl(180,10%,60%) 3.8%, hsl(180,29%,66%) 4.5%, hsl(180,10%,60%) 5.2%, #0e152e 10%, #0e152e 12%),
+    radial-gradient(farthest-corner circle at var(--mx) var(--my), rgba(0,0,0,.1) 12%, rgba(0,0,0,.15) 20%, rgba(0,0,0,.25) 120%);
+  background-blend-mode:exclusion, hue, hard-light;
+  background-size:200% 700%, 300% 100%, 200% 100%;
+  background-position:var(--bgx) var(--bgy), var(--bgx) var(--bgy), var(--bgx) var(--bgy);
+  filter:brightness(.85) contrast(2) saturate(.75);
+  mix-blend-mode:color-dodge;
+  opacity:calc(var(--intensity) * (.35 + var(--hyp) * .65));
+}
+.glitter{
+  background-image:var(--sparkle);background-size:180px 180px;
+  background-position:calc(var(--bgx) * -1) calc(var(--bgy) * -1);
+  mix-blend-mode:color-dodge;opacity:0;
+}
+.glare{
+  background-image:radial-gradient(farthest-corner circle at var(--mx) var(--my),
+    hsla(0,0%,100%,.75) 8%, hsla(0,0%,100%,.45) 22%, hsla(0,0%,0%,.55) 95%);
+  mix-blend-mode:overlay;
+  opacity:calc(.25 + var(--hyp) * .55);
+}
+
+/* estilos */
+.card[data-style="galaxia"] .foil{
+  background-size:300% 400%, 260% 100%, 200% 100%;
+  filter:brightness(.7) contrast(2.3) saturate(1.1) hue-rotate(-20deg);
+  opacity:calc(var(--intensity) * (.25 + var(--hyp) * .55));
+}
+.card[data-style="galaxia"] .glitter{opacity:calc(var(--intensity) * (.45 + var(--hyp) * .55))}
+.card[data-style="arte"] .foil,
+.card[data-style="arte"] .glitter{
+  -webkit-mask-image:var(--artmask);mask-image:var(--artmask);
+  -webkit-mask-size:100% 100%;mask-size:100% 100%;
+}
+.card[data-style="arte"] .foil{opacity:calc(var(--intensity) * (.5 + var(--hyp) * .5))}
+
+/* verso original */
+.back{
+  transform:rotateY(180deg);
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 17%, rgba(201,164,92,.55) 17.4% 18%, transparent 18.4% 26%, rgba(201,164,92,.25) 26.3% 26.8%, transparent 27.2%),
+    repeating-conic-gradient(from 0deg at 50% 50%, rgba(201,164,92,.06) 0deg 6deg, transparent 6deg 12deg),
+    radial-gradient(ellipse at 50% 45%, #1d2a52 0%, #0b1022 60%, #05070d 100%);
+  display:flex;align-items:center;justify-content:center;
+  border:calc(var(--cw)*.035) solid #11162a;box-sizing:border-box;
+}
+.back .sigil{
+  width:30%;aspect-ratio:1;transform:rotate(45deg);
+  border:1.5px solid rgba(201,164,92,.7);
+  box-shadow:inset 0 0 0 calc(var(--cw)*.02) rgba(5,7,13,.9), inset 0 0 0 calc(var(--cw)*.024) rgba(201,164,92,.4);
+  background:radial-gradient(circle, rgba(120,90,220,.35), transparent 70%);
+}
+.back .foil{opacity:calc(var(--intensity) * (.15 + var(--hyp) * .35))}
+
+/* controles */
+.controls{
+  display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.74rem;color:var(--muted);
+}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;background:rgba(13,18,32,.7)}
+.seg button,.btn{
+  font:inherit;color:var(--muted);background:transparent;border:0;border-radius:999px;
+  padding:6px 12px;cursor:pointer;letter-spacing:.04em;
+}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--abyss)}
+.btn{border:1px solid var(--line);background:rgba(13,18,32,.7)}
+.btn:hover,.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]:hover{color:var(--abyss)}
+button:focus-visible,label.btn:focus-within,input:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+.range{display:flex;align-items:center;gap:8px}
+.range input{accent-color:var(--ember);width:110px}
+.toggle{display:flex;align-items:center;gap:6px;cursor:pointer}
+.toggle input{accent-color:var(--ember)}
+label.btn input{position:absolute;opacity:0;width:1px;height:1px}
+.hint{font-family:var(--mono);font-size:.66rem;color:#545b78;letter-spacing:.06em;text-align:center;margin:0}
+@media (max-width:480px){ .range input{width:84px} .controls{gap:8px 10px} }
+@media (prefers-reduced-motion:reduce){ .card.flipping{transition:none} }
+</style>
+<meta property="og:title" content="Artorias, o Caminhante do Abismo">
+<meta property="og:image" content="card.jpg">
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <h1>Artorias, o Caminhante do Abismo</h1>
+    <span class="tag" id="styleTag">Foil tradicional</span>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="shadow"></div>
+    <div class="card" id="card" data-style="tradicional">
+      <div class="face front">
+        <img id="cardImg" src="card.jpg" alt="Carta Artorias, o Caminhante do Abismo">
+        <div class="foil"></div>
+        <div class="glitter"></div>
+        <div class="glare"></div>
+      </div>
+      <div class="face back">
+        <div class="sigil"></div>
+        <div class="foil"></div>
+        <div class="glare"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Estilo de foil">
+      <button type="button" id="s-trad" data-style="tradicional" aria-pressed="true">Tradicional</button>
+      <button type="button" id="s-gal" data-style="galaxia" aria-pressed="false">Galáxia</button>
+      <button type="button" id="s-arte" data-style="arte" aria-pressed="false">Só na arte</button>
+    </div>
+    <div class="range">
+      <label for="intensity">Brilho</label>
+      <input type="range" id="intensity" min="0" max="1.4" step="0.05" value="0.85">
+    </div>
+    <label class="toggle" for="auto"><input type="checkbox" id="auto" checked> Balanço automático</label>
+    <button type="button" class="btn" id="flipBtn">Virar carta</button>
+    <label class="btn" for="upload">Trocar imagem<input type="file" id="upload" accept="image/*"></label>
+  </div>
+  <p class="hint">Mova o mouse ou arraste o dedo sobre a carta · duplo clique para virar</p>
+</div>
+
+<script>
+(function(){
+  const root=document.documentElement, stage=document.getElementById('stage'), card=document.getElementById('card');
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // textura de glitter gerada na hora
+  const c=document.createElement('canvas'); c.width=c.height=180;
+  const g=c.getContext('2d');
+  for(let i=0;i<420;i++){
+    const x=Math.random()*180,y=Math.random()*180,r=Math.random()*1.4+.3;
+    const h=Math.floor(Math.random()*360);
+    g.fillStyle=`hsla(${h},90%,${60+Math.random()*35}%,${.5+Math.random()*.5})`;
+    g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fill();
+  }
+  for(let i=0;i<14;i++){ // estrelas com brilho cruzado
+    const x=Math.random()*180,y=Math.random()*180,s=3+Math.random()*4;
+    g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=.7;
+    g.beginPath();g.moveTo(x-s,y);g.lineTo(x+s,y);g.moveTo(x,y-s);g.lineTo(x,y+s);g.stroke();
+  }
+  root.style.setProperty('--sparkle',`url(${c.toDataURL()})`);
+
+  // máscara: foil só na arte (exclui barra do nome, linha de tipo, caixa de texto e P/R)
+  const mask=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 659 931' preserveAspectRatio='none'>
+    <rect width='659' height='931' fill='white'/>
+    <rect x='30' y='28' width='600' height='84' rx='14' fill='black'/>
+    <rect x='34' y='518' width='594' height='360' rx='8' fill='black'/>
+    <rect x='508' y='834' width='120' height='64' rx='10' fill='black'/></svg>`;
+  root.style.setProperty('--artmask',`url("data:image/svg+xml,${encodeURIComponent(mask)}")`);
+
+  let tx=0,ty=0,cx=0,cy=0,tmx=50,tmy=50,cmx=50,cmy=50,lastInput=-1e9,flipped=false;
+  const auto=document.getElementById('auto');
+
+  function onMove(e){
+    const r=card.getBoundingClientRect();
+    let px=(e.clientX-r.left)/r.width, py=(e.clientY-r.top)/r.height;
+    px=Math.min(1.15,Math.max(-.15,px)); py=Math.min(1.15,Math.max(-.15,py));
+    const dx=px-.5, dy=py-.5;
+    ty= dx*36*(flipped?-1:1);  // rotateY
+    tx=-dy*30;                 // rotateX
+    tmx=px*100; tmy=py*100;
+    lastInput=performance.now();
+  }
+  stage.addEventListener('pointermove',onMove);
+  stage.addEventListener('pointerdown',e=>{stage.setPointerCapture&&stage.setPointerCapture(e.pointerId);onMove(e)});
+  stage.addEventListener('pointerleave',()=>{lastInput=performance.now()-1800});
+
+  function tick(t){
+    const idle=t-lastInput>2200;
+    if(idle){
+      if(auto.checked && !reduce){
+        const s=t/1000;
+        ty=Math.sin(s*.7)*20; tx=Math.sin(s*.5+1)*9;
+        tmx=50+Math.sin(s*.7)*42; tmy=50-Math.sin(s*.5+1)*30;
+      } else { tx=0;ty=0;tmx=50;tmy=50; }
+    }
+    const k=idle?.04:.14;
+    cx+=(tx-cx)*k; cy+=(ty-cy)*k; cmx+=(tmx-cmx)*k; cmy+=(tmy-cmy)*k;
+    const hyp=Math.min(1,Math.hypot(cmx-50,cmy-50)/50);
+    const s=root.style;
+    s.setProperty('--rx',cx.toFixed(2)+'deg');
+    s.setProperty('--ry',cy.toFixed(2)+'deg');
+    s.setProperty('--mx',cmx.toFixed(1)+'%');
+    s.setProperty('--my',cmy.toFixed(1)+'%');
+    s.setProperty('--hyp',hyp.toFixed(3));
+    s.setProperty('--bgx',(37+cmx/100*26).toFixed(1)+'%');
+    s.setProperty('--bgy',(33+cmy/100*34).toFixed(1)+'%');
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // estilos
+  const tag=document.getElementById('styleTag');
+  const names={tradicional:'Foil tradicional',galaxia:'Foil galáxia',arte:'Foil só na arte'};
+  document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.seg button').forEach(o=>o.setAttribute('aria-pressed',o===b));
+    card.dataset.style=b.dataset.style; tag.textContent=names[b.dataset.style];
+  }));
+  document.getElementById('intensity').addEventListener('input',e=>root.style.setProperty('--intensity',e.target.value));
+
+  // virar
+  function flip(){
+    flipped=!flipped;
+    card.classList.add('flipping');
+    root.style.setProperty('--flip',flipped?'180deg':'0deg');
+    setTimeout(()=>card.classList.remove('flipping'),720);
+  }
+  document.getElementById('flipBtn').addEventListener('click',flip);
+  stage.addEventListener('dblclick',flip);
+
+  // trocar imagem
+  document.getElementById('upload').addEventListener('change',e=>{
+    const f=e.target.files&&e.target.files[0]; if(!f) return;
+    const rd=new FileReader();
+    rd.onload=()=>{document.getElementById('cardImg').src=rd.result};
+    rd.readAsDataURL(f);
+  });
+})();
+</script>
+
+</body>
+</html>
